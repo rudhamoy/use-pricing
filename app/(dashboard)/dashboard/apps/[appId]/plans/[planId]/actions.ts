@@ -15,3 +15,19 @@ export async function addFeatureToPlan(planId: string, formData: FormData) {
 
   revalidatePath(`/dashboard/apps/.*/plans/${planId}`);
 }
+
+export async function updateFeatureConfig(
+  planFeatureId: string,
+  formData: FormData
+) {
+  const config = formData.get("config") as string;
+
+  await prisma.planFeature.update({
+    where: { id: planFeatureId },
+    data: {
+      config: JSON.parse(config),
+    },
+  });
+
+  revalidatePath(`/dashboard/apps/.*/plans/.*`);
+}

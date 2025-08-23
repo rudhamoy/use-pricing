@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { addFeatureToPlan } from "./actions";
+import { addFeatureToPlan, updateFeatureConfig } from "./actions";
 
 export default async function PlanDetailsPage({
   params,
@@ -51,6 +51,23 @@ export default async function PlanDetailsPage({
             <p className="text-gray-600">
               {planFeature.feature.description}
             </p>
+            <form
+              action={updateFeatureConfig.bind(null, planFeature.id)}
+              className="mt-4"
+            >
+              <textarea
+                name="config"
+                placeholder="Feature Config (JSON)"
+                className="p-2 border rounded-md w-full"
+                defaultValue={JSON.stringify(planFeature.config, null, 2)}
+              />
+              <button
+                type="submit"
+                className="mt-2 p-2 bg-blue-500 text-white rounded-md"
+              >
+                Save Config
+              </button>
+            </form>
           </div>
         ))}
       </div>
