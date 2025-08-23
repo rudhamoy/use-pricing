@@ -29,6 +29,12 @@ export default async function AppDetailsPage({
         >
           Manage Plans
         </Link>
+        <Link
+          href={`/dashboard/apps/${app.id}/usage`}
+          className="px-4 py-2 bg-yellow-500 text-white rounded-md"
+        >
+          View Usage
+        </Link>
       </div>
 
       <div className="mb-8">
