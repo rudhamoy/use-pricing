@@ -1,0 +1,116 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Clients and their apps
+model Client {
+  id          String   @id @default(cuid())
+  name        String
+  email       String   @unique
+  apiKey      String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  apps        ClientApp[]
+}
+
+model ClientApp {
+  id          String   @id @default(cuid())
+  clientId    String
+  name        String
+  apiKey      String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  client      Client   @relation(fields: [clientId], references: [id])
+  plans       Plan[]
+  users       AppUser[]
+  features     Feature[]
+}
+
+// Plans and Features
+model Plan {
+  id           String   @id @default(cuid())
+  clientAppId  String
+  name         String
+  description  String?
+  baseFee      Float    // Monthly/Yearly base cost
+  billingCycle String   // monthly, yearly, custom
+  allowance    Json     // { "unitType": "tokens", "amount": 100000, "resetInterval": "monthly" }
+  overage      Json?    // { "enabled": true, "ratePerUnit": 0.002 }
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  clientApp    ClientApp @relation(fields: [clientAppId], references: [id])
+  features     PlanFeature[]
+  plans        Subscription[]
+}
+
+model PlanFeature {
+  id         String   @id @default(cuid())
+  planId     String
+  featureId  String
+  config     Json?    // Client-defined config for the feature
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  plan       Plan     @relation(fields: [planId], references: [id])
+  feature    Feature  @relation(fields: [featureId], references: [id])
+}
+
+model Feature {
+  id          String   @id @default(cuid())
+  clientAppId String
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  clientApp   ClientApp @relation(fields: [clientAppId], references: [id])
+  planFeatures PlanFeature[]
+}
+
+// Users and Subscriptions
+model AppUser {
+  id          String   @id @default(cuid())
+  clientAppId String
+  externalId  String   // ID from Clerk, Auth0, Firebase, etc.
+  email       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  clientApp   ClientApp @relation(fields: [clientAppId], references: [id])
+  subscriptions Subscription[]
+  usage       UsageRecord[]
+}
+
+model Subscription {
+  id         String   @id @default(cuid())
+  userId     String
+  planId     String
+  status     String   // active, canceled, trialing, past_due
+  startDate  DateTime @default(now())
+  endDate    DateTime?
+  trialEnd   DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user       AppUser  @relation(fields: [userId], references: [id])
+  plan       Plan     @relation(fields: [planId], references: [id])
+}
+// Usage Tracking
+model UsageRecord {
+  id          String   @id @default(cuid())
+  userId      String
+  unitType    String   // tokens, api_calls, storage_gb, custom_metric
+  amount      Int
+  recordedAt  DateTime @default(now())
+  resetPeriod String   // monthly, yearly, daily (based on plan allowance)
+  
+  user        AppUser  @relation(fields: [userId], references: [id])
+}

@@ -20,6 +20,14 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Architectural Decisions
+
+### User Creation Flow (Client Record)
+
+For the initial development phase, we are implementing a synchronous process for creating a `Client` record. This means the `Client` record will be created in our database immediately after a user successfully signs up and is redirected back to the application from Clerk.
+
+**TODO:** As the application matures, we should migrate this to a more robust, asynchronous webhook-based system. Using a webhook will decouple our application from Clerk's user creation process, improving reliability and resilience. This will involve setting up a dedicated webhook endpoint and using a tunneling service like `ngrok` for local development.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
