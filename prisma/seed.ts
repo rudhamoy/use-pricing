@@ -43,6 +43,20 @@ async function main() {
       },
     });
   }
+
+  let imageFeature = await prisma.feature.findFirst({
+    where: { name: "Image Generation", clientAppId: clientApp.id },
+  });
+
+  if (!imageFeature) {
+    imageFeature = await prisma.feature.create({
+      data: {
+        name: "Image Generation",
+        description: "Generate AI-powered images.",
+        clientAppId: clientApp.id,
+      },
+    });
+  }
 }
 
 main()

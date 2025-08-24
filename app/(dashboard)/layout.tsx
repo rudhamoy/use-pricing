@@ -19,6 +19,9 @@ export default function DashboardLayout({
           <Link href="/analytics" className="text-sm">
             Analytics
           </Link>
+          <Link href="/image-generator" className="text-sm">
+            Image Generator
+          </Link>
         </div>
         <UserButton afterSignOutUrl="/" />
       </header>
