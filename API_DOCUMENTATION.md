@@ -31,6 +31,14 @@ This endpoint allows you to fetch all of the pricing plans for your application.
               "description": "The basic plan.",
               "baseFee": 10,
               "billingCycle": "monthly",
+              "allowance": {
+                "unitType": "image_generation",
+                "amount": 10
+              },
+              "overage": {
+                "enabled": true,
+                "ratePerUnit": 0.5
+              },
               "features": [
                 {
                   "feature": {
