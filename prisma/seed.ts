@@ -29,6 +29,20 @@ async function main() {
       },
     });
   }
+
+  let feature = await prisma.feature.findFirst({
+    where: { name: "Advanced Analytics", clientAppId: clientApp.id },
+  });
+
+  if (!feature) {
+    feature = await prisma.feature.create({
+      data: {
+        name: "Advanced Analytics",
+        description: "Access to advanced analytics and reporting.",
+        clientAppId: clientApp.id,
+      },
+    });
+  }
 }
 
 main()

@@ -16,6 +16,9 @@ export default function DashboardLayout({
           <Link href="/pricing" className="text-sm">
             Pricing
           </Link>
+          <Link href="/analytics" className="text-sm">
+            Analytics
+          </Link>
         </div>
         <UserButton afterSignOutUrl="/" />
       </header>

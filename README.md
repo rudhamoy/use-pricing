@@ -28,6 +28,10 @@ For the initial development phase, we are implementing a synchronous process for
 
 **TODO:** As the application matures, we should migrate this to a more robust, asynchronous webhook-based system. Using a webhook will decouple our application from Clerk's user creation process, improving reliability and resilience. This will involve setting up a dedicated webhook endpoint and using a tunneling service like `ngrok` for local development.
 
+### Client-Side SDK
+
+**TODO:** To provide the best possible developer experience for our clients, we should create a client-side SDK. This SDK would include a `PricingProvider` component, a `usePricing` hook, and a `Feature` component to make it incredibly easy to implement feature gating. This would be a major value-add for our service and would likely be distributed as an npm package.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
