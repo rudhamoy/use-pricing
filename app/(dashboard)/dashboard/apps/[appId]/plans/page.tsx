@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { createPlan } from "./actions";
+import AdvancedPricingForm from "./components/AdvancedPricingForm";
 
 export default async function PlansPage({
   params,
@@ -36,20 +37,7 @@ export default async function PlansPage({
             placeholder="Plan Description"
             className="p-2 border rounded-md"
           />
-          <input
-            type="number"
-            name="baseFee"
-            placeholder="Base Fee"
-            className="p-2 border rounded-md"
-            required
-          />
-          <input
-            type="text"
-            name="billingCycle"
-            placeholder="Billing Cycle (e.g., monthly, yearly)"
-            className="p-2 border rounded-md"
-            required
-          />
+          <AdvancedPricingForm />
           <button type="submit" className="p-2 bg-blue-500 text-white rounded-md">
             Create Plan
           </button>

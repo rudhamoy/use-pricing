@@ -17,7 +17,17 @@ export async function GET(
 
     const app = await prisma.clientApp.findUnique({
       where: { id: params.appId, apiKey },
-      include: { plans: { include: { features: { include: { feature: true } } } } },
+      include: {
+        plans: {
+          include: {
+            features: {
+              include: {
+                feature: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!app) {
