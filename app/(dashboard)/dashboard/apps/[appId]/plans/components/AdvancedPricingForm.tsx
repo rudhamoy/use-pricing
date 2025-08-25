@@ -7,6 +7,12 @@ export default function AdvancedPricingForm() {
 
   return (
     <div className="flex flex-col gap-4">
+      <input
+        type="number"
+        name="trialPeriodDays"
+        placeholder="Trial Period (in days)"
+        className="p-2 border rounded-md"
+      />
       <select
         name="pricingModel"
         value={pricingModel}

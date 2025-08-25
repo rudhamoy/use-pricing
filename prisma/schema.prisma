@@ -41,6 +41,7 @@ model Plan {
   description  String?
   baseFee      Float    // Monthly/Yearly base cost
   billingCycle String   // monthly, yearly, custom
+  trialPeriodDays Int?   // Length of the trial in days
   allowance    Json     // { "unitType": "tokens", "amount": 100000, "resetInterval": "monthly" }
   overage      Json?    // { "enabled": true, "ratePerUnit": 0.002 }
   isActive     Boolean  @default(true)

@@ -7,12 +7,17 @@ export async function createPlan(appId: string, formData: FormData) {
   const name = formData.get("name") as string;
   const description = formData.get("description") as string;
   const pricingModel = formData.get("pricingModel") as string;
+  const trialPeriodDays = formData.get("trialPeriodDays") as string;
 
   let data: any = {
     name,
     description,
     clientAppId: appId,
   };
+
+  if (trialPeriodDays) {
+    data.trialPeriodDays = parseInt(trialPeriodDays);
+  }
 
   if (pricingModel === "subscription") {
     data.baseFee = parseFloat(formData.get("baseFee") as string);
