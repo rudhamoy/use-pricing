@@ -46,13 +46,48 @@ export async function POST(req: Request) {
           },
         },
       },
+      include: {
+        plan: {
+          include: {
+            features: {
+              where: {
+                feature: {
+                  name: featureName,
+                },
+              },
+            },
+          },
+        },
+      },
     });
 
-    if (subscription) {
-      return NextResponse.json({ success: true, data: { hasAccess: true } });
-    } else {
+    if (!subscription) {
       return NextResponse.json({ success: true, data: { hasAccess: false } });
     }
+
+    const planFeature = subscription.plan.features[0];
+    const config = planFeature.config as any;
+
+    if (config && config.limit) {
+      const usage = await prisma.usageRecord.aggregate({
+        where: {
+          userId,
+          unitType: featureName,
+          recordedAt: {
+            gte: new Date(new Date().setDate(new Date().getDate() - 30)), // TODO: Make this dynamic
+          },
+        },
+        _sum: {
+          amount: true,
+        },
+      });
+
+      if (usage._sum.amount && usage._sum.amount >= config.limit) {
+        return NextResponse.json({ success: true, data: { hasAccess: false } });
+      }
+    }
+
+    return NextResponse.json({ success: true, data: { hasAccess: true } });
   } catch (error) {
     console.error("Error checking feature access:", error);
     return NextResponse.json(
