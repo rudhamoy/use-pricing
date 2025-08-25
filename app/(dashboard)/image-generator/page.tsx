@@ -6,14 +6,16 @@ import { useState } from "react";
 export default function ImageGeneratorPage() {
   const { userId } = useAuth();
   const [images, setImages] = useState<string[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   const generateImage = async () => {
     if (!userId) {
       return;
     }
 
-    // Record usage
-    await fetch("/api/public/usage/record", {
+    setError(null);
+
+    const res = await fetch("/api/public/usage/increment", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -21,13 +23,21 @@ export default function ImageGeneratorPage() {
       },
       body: JSON.stringify({
         userId,
-        unitType: "image_generation",
+        unitType: "Image Generation",
         amount: 1,
       }),
     });
 
-    // Simulate image generation
-    setImages([...images, `https://picsum.photos/200/300?random=${Math.random()}`]);
+    if (res.ok) {
+      // Simulate image generation
+      setImages([
+        ...images,
+        `https://picsum.photos/200/300?random=${Math.random()}`,
+      ]);
+    } else {
+      const data = await res.json();
+      setError(data.error || "An error occurred.");
+    }
   };
 
   return (
@@ -39,6 +49,7 @@ export default function ImageGeneratorPage() {
       >
         Generate Image
       </button>
+      {error && <p className="text-red-500 mt-4">{error}</p>}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
         {images.map((src, index) => (
           <img key={index} src={src} alt="Generated" className="rounded-md" />

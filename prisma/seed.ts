@@ -57,6 +57,55 @@ async function main() {
       },
     });
   }
+
+  const freePlan = await prisma.plan.upsert({
+    where: { name_clientAppId: { name: "Free", clientAppId: clientApp.id } },
+    update: {},
+    create: {
+      name: "Free",
+      description: "The free plan.",
+      baseFee: 0,
+      billingCycle: "monthly",
+      clientAppId: clientApp.id,
+      allowance: {},
+    },
+  });
+
+  await prisma.planFeature.upsert({
+    where: {
+      planId_featureId: {
+        planId: freePlan.id,
+        featureId: imageFeature.id,
+      },
+    },
+    update: {},
+    create: {
+      planId: freePlan.id,
+      featureId: imageFeature.id,
+      config: {
+        limit: 5,
+      },
+    },
+  });
+
+  const testUser = await prisma.appUser.upsert({
+    where: { externalId: "user_31mpSXElvQnxSuu54aqckSzBdeb" },
+    update: {},
+    create: {
+      externalId: "user_31mpSXElvQnxSuu54aqckSzBdeb",
+      clientAppId: clientApp.id,
+    },
+  });
+
+  await prisma.subscription.upsert({
+    where: { userId: testUser.id },
+    update: {},
+    create: {
+      userId: testUser.id,
+      planId: freePlan.id,
+      status: "active",
+    },
+  });
 }
 
 main()

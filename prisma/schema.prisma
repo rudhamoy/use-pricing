@@ -40,6 +40,8 @@ model Plan {
   name         String
   description  String?
   baseFee      Float    // Monthly/Yearly base cost
+
+  @@unique([name, clientAppId])
   billingCycle String   // monthly, yearly, custom
   trialPeriodDays Int?   // Length of the trial in days
   allowance    Json     // { "unitType": "tokens", "amount": 100000, "resetInterval": "monthly" }
@@ -59,6 +61,8 @@ model PlanFeature {
   featureId  String
   config     Json?    // Client-defined config for the feature
   createdAt  DateTime @default(now())
+
+  @@unique([planId, featureId])
   updatedAt  DateTime @updatedAt
 
   plan       Plan     @relation(fields: [planId], references: [id])
@@ -80,7 +84,7 @@ model Feature {
 model AppUser {
   id          String   @id @default(cuid())
   clientAppId String
-  externalId  String   // ID from Clerk, Auth0, Firebase, etc.
+  externalId  String   @unique // ID from Clerk, Auth0, Firebase, etc.
   email       String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -92,7 +96,7 @@ model AppUser {
 
 model Subscription {
   id         String   @id @default(cuid())
-  userId     String
+  userId     String   @unique
   planId     String
   status     String   // active, canceled, trialing, past_due
   startDate  DateTime @default(now())
