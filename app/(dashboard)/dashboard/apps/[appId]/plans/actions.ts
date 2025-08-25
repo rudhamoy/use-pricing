@@ -18,6 +18,19 @@ export async function createPlan(appId: string, formData: FormData) {
     data.baseFee = parseFloat(formData.get("baseFee") as string);
     data.billingCycle = formData.get("billingCycle") as string;
     data.allowance = {};
+  } else if (pricingModel === "token-based") {
+    data.allowance = {
+      unitType: "tokens",
+      amount: parseInt(formData.get("tokenAllowance") as string),
+      resetInterval: formData.get("resetInterval") as string,
+    };
+    const overageRate = formData.get("overageRate") as string;
+    if (overageRate) {
+      data.overage = {
+        enabled: true,
+        ratePerUnit: parseFloat(overageRate),
+      };
+    }
   } else if (pricingModel === "pay-as-you-go") {
     data.baseFee = 0;
     data.billingCycle = "monthly";

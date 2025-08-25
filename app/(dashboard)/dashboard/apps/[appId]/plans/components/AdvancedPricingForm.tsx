@@ -15,6 +15,7 @@ export default function AdvancedPricingForm() {
       >
         <option value="subscription">Subscription</option>
         <option value="pay-as-you-go">Pay-as-you-go</option>
+        <option value="token-based">Token-Based</option>
         <option value="tiered">Tiered</option>
       </select>
 
@@ -33,6 +34,31 @@ export default function AdvancedPricingForm() {
             placeholder="Billing Cycle (e.g., monthly, yearly)"
             className="p-2 border rounded-md"
             required
+          />
+        </>
+      )}
+
+      {pricingModel === "token-based" && (
+        <>
+          <input
+            type="number"
+            name="tokenAllowance"
+            placeholder="Token Allowance"
+            className="p-2 border rounded-md"
+            required
+          />
+          <input
+            type="text"
+            name="resetInterval"
+            placeholder="Reset Interval (e.g., monthly, yearly)"
+            className="p-2 border rounded-md"
+            required
+          />
+          <input
+            type="number"
+            name="overageRate"
+            placeholder="Overage Rate (per token)"
+            className="p-2 border rounded-md"
           />
         </>
       )}
