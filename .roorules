@@ -1,0 +1,4 @@
+- Always use ShadCN components where applicable.
+- Use Context7 MCP Tool to find applicable components and packages if you don’t know about one. You can also use this to know about a library and package.
+-  If  the user provides a URL for a component or package then use the fetch tool to scrape it and use that.
+- Maintain a list of used ShadCN components in ShadCN-context.md(make one if it doesn’t exist). It should contain all the components used and references this to check if you need to install a ShadCN component from scratch with the CLI tool or not
