@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import FeatureConfig from "./FeatureConfig";
+import { Badge } from "@/components/ui/badge";
 
 export default function FeatureSelect({
   appId,
@@ -46,7 +48,6 @@ export default function FeatureSelect({
         {features.map((feature) => (
           <div
             key={feature.id}
-            onClick={() => toggleFeature(feature.id)}
             className={cn(
               "p-4 border rounded-md cursor-pointer transition-all",
               selectedFeatures.includes(feature.id)
@@ -54,7 +55,10 @@ export default function FeatureSelect({
                 : "hover:border-primary/50"
             )}
           >
-            <div className="flex items-center justify-between">
+            <div
+              onClick={() => toggleFeature(feature.id)}
+              className="flex items-center justify-between"
+            >
               <h4
                 className={cn(
                   "font-semibold",
@@ -70,6 +74,37 @@ export default function FeatureSelect({
             <p className="text-sm text-muted-foreground">
               {feature.description}
             </p>
+            {plan.features.find((f: any) => f.featureId === feature.id)
+              ?.config && (
+              <div className="mt-4">
+                <h4 className="font-semibold">Configuration</h4>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {Object.entries(
+                    plan.features.find((f: any) => f.featureId === feature.id)
+                      .config
+                  ).map(([key, value]) => (
+                    <Badge key={key} variant="secondary">
+                      {key}: {String(value)}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+            {selectedFeatures.includes(feature.id) && (
+              <div className="mt-4">
+                <FeatureConfig
+                  planFeature={
+                    plan.features.find(
+                      (f: any) => f.featureId === feature.id
+                    ) || {
+                      planId: plan.id,
+                      featureId: feature.id,
+                      config: {},
+                    }
+                  }
+                />
+              </div>
+            )}
           </div>
         ))}
       </div>
