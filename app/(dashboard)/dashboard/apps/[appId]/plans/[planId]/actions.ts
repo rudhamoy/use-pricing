@@ -4,12 +4,29 @@ import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
 export async function addFeatureToPlan(planId: string, formData: FormData) {
-  const featureId = formData.get("featureId") as string;
+  const featureIds = (formData.get("featureIds") as string).split(",");
 
-  await prisma.planFeature.create({
-    data: {
+  await prisma.planFeature.deleteMany({
+    where: { planId },
+  });
+
+  await prisma.planFeature.createMany({
+    data: featureIds.map((featureId) => ({
       planId,
       featureId,
+    })),
+  });
+
+  revalidatePath(`/dashboard/apps/.*/plans/${planId}`);
+}
+
+export async function removeFeatureFromPlan(planId: string, featureId: string) {
+  await prisma.planFeature.delete({
+    where: {
+      planId_featureId: {
+        planId,
+        featureId,
+      },
     },
   });
 
