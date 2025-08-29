@@ -1,72 +1,180 @@
 import prisma from "@/lib/prisma";
-import { createFeature } from "./actions";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import {
+  Users,
+  DollarSign,
+  Activity,
+  CreditCard,
+} from "lucide-react";
 
 export default async function AppDetailsPage({
   params,
 }: {
   params: { appId: string };
 }) {
-  const createFeatureWithAppId = createFeature.bind(null, params.appId);
   const app = await prisma.clientApp.findUnique({
     where: { id: params.appId },
-    include: { features: true },
+    include: {
+      users: {
+        include: {
+          subscriptions: true,
+          usage: true,
+        },
+      },
+    },
   });
 
   if (!app) {
     return <div>App not found</div>;
   }
 
+  const totalUsers = app.users.length;
+  const activeSubscriptions = app.users.reduce(
+    (acc, user) =>
+      acc + user.subscriptions.filter((s) => s.status === "active").length,
+    0
+  );
+  const mrr = app.users.reduce((acc, user) => {
+    const activeSubscription = user.subscriptions.find(
+      (s) => s.status === "active"
+    );
+    if (activeSubscription) {
+      // This is a simplified MRR calculation. A real-world implementation
+      // would need to be more sophisticated.
+      // @ts-ignore
+      return acc + (activeSubscription.plan?.baseFee || 0);
+    }
+    return acc;
+  }, 0);
+
+  const recentUsage = app.users
+    .flatMap((user) => user.usage)
+    .sort((a, b) => b.recordedAt.getTime() - a.recordedAt.getTime())
+    .slice(0, 5);
+
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-4">{app.name}</h1>
-      <p className="text-gray-500 mb-8">{app.apiKey}</p>
-
-      <div className="mb-8">
-        <Link
-          href={`/dashboard/apps/${app.id}/plans`}
-          className="px-4 py-2 bg-green-500 text-white rounded-md"
-        >
-          Manage Plans
-        </Link>
-        <Link
-          href={`/dashboard/apps/${app.id}/usage`}
-          className="px-4 py-2 bg-yellow-500 text-white rounded-md"
-        >
-          View Usage
-        </Link>
-      </div>
-
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">Create New Feature</h2>
-        <form action={createFeatureWithAppId} className="flex flex-col gap-4 max-w-sm">
-          <input
-            type="text"
-            name="name"
-            placeholder="Feature Name"
-            className="p-2 border rounded-md"
-            required
-          />
-          <textarea
-            name="description"
-            placeholder="Feature Description"
-            className="p-2 border rounded-md"
-          />
-          <button type="submit" className="p-2 bg-blue-500 text-white rounded-md">
-            Create Feature
-          </button>
-        </form>
-      </div>
-
-      <h2 className="text-xl font-semibold mb-4">Features</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {app.features.map((feature) => (
-          <div key={feature.id} className="p-4 border rounded-md">
-            <h3 className="text-lg font-semibold">{feature.name}</h3>
-            <p className="text-gray-600">{feature.description}</p>
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+          <Users className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{totalUsers}</div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">
+            Active Subscriptions
+          </CardTitle>
+          <CreditCard className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{activeSubscriptions}</div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">
+            Monthly Recurring Revenue
+          </CardTitle>
+          <DollarSign className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">${mrr.toFixed(2)}</div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Recent Usage</CardTitle>
+          <Activity className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">
+            {recentUsage.reduce((acc, r) => acc + r.amount, 0)}
           </div>
-        ))}
-      </div>
+        </CardContent>
+      </Card>
+      <Card className="col-span-4">
+        <CardHeader>
+          <CardTitle>Recent Activity</CardTitle>
+          <CardDescription>
+            A log of the most recent usage events.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>User</TableHead>
+                <TableHead>Unit Type</TableHead>
+                <TableHead>Amount</TableHead>
+                <TableHead>Date</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {recentUsage.map((record) => (
+                <TableRow key={record.id}>
+                  <TableCell>
+                    {
+                      app.users.find((u) =>
+                        u.usage.some((r) => r.id === record.id)
+                      )?.externalId
+                    }
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{record.unitType}</Badge>
+                  </TableCell>
+                  <TableCell>{record.amount}</TableCell>
+                  <TableCell>
+                    {record.recordedAt.toLocaleDateString()}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+      <Card className="col-span-4">
+        <CardHeader>
+          <CardTitle>Quick Actions</CardTitle>
+          <CardDescription>
+            Perform common actions quickly and easily.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4 sm:grid-cols-2">
+          <Link href={`/dashboard/apps/${params.appId}/plans`}>
+            <Button className="w-full">Create New Plan</Button>
+          </Link>
+          <Link href={`/dashboard/apps/${params.appId}/features`}>
+            <Button className="w-full">Create New Feature</Button>
+          </Link>
+          <Link href={`/dashboard/apps/${params.appId}/api-keys`}>
+            <Button className="w-full">View API Keys</Button>
+          </Link>
+          <Link href="/api-docs">
+            <Button className="w-full">View Documentation</Button>
+          </Link>
+        </CardContent>
+      </Card>
     </div>
   );
 }
